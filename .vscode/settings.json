@@ -1,0 +1,7 @@
+{
+    "pylint.args": [
+        "--load-plugins=pylint_django",
+        "--django-settings-module=locallibrary.settings",
+        "--disable=C0114,C0115"
+    ]
+}
