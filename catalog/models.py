@@ -32,6 +32,33 @@ class Genre(models.Model):
         ]
 
 
+class Language(models.Model):
+    """Model representing the language in which a book is written."""
+
+    name = models.CharField(
+        max_length=50,
+        unique=True,
+        help_text="Enter a book language (e.g. English, Spanish, etc.)",
+    )
+
+    def __str__(self):
+        """String for representing the Model object."""
+        return f"{self.name}"
+
+    def get_absolute_url(self):
+        """Returns the URL to access a particular language instance."""
+        return reverse("language-detail", args=[str(self.id)])
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                Lower("name"),
+                name="language_name_case_insensitive_unique",
+                violation_error_message="Language already exists (case insensitive match)",
+            )
+        ]
+
+
 class Book(models.Model):
     """Model representing a book (but not a specific copy of a book)."""
 
@@ -48,6 +75,9 @@ class Book(models.Model):
         "ISBN number</a>",
     )
     genre = models.ManyToManyField(Genre, help_text="Select a genre for this book")
+    language = models.ForeignKey(
+        Language, on_delete=models.RESTRICT, help_text="Select a language for this book"
+    )
 
     def __str__(self):
         """String for representing the Model object."""
@@ -96,18 +126,19 @@ class BookInstance(models.Model):
 
 class Author(models.Model):
     """Model representing an author."""
+
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     date_of_birth = models.DateField(null=True, blank=True)
-    date_of_death = models.DateField('Died', null=True, blank=True)
+    date_of_death = models.DateField("Died", null=True, blank=True)
 
     class Meta:
-        ordering = ['last_name', 'first_name']
-    
+        ordering = ["last_name", "first_name"]
+
     def get_absolute_url(self):
         """Returns the URL to access a particular author instance."""
-        return reverse('author-detail', args=[str(self.id)])
+        return reverse("author-detail", args=[str(self.id)])
 
     def __str__(self):
         """String for representing the Model object."""
-        return f'{self.last_name}, {self.first_name}'
+        return f"{self.last_name}, {self.first_name}"
