@@ -1,0 +1,23 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+  <h1>Delete Author: {{ author }}</h1>
+
+  {% if author.book_set.all %}
+    <p>You can't delete this author until all their books have been deleted:</p>
+    <ul>
+      {% for book in author.book_set.all %}
+        <li>
+          <a href="{% url 'book-detail' book.pk %}">{{ book }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Are you sure you want to delete the author?</p>
+
+    <form action="" method="post">
+      {% csrf_token %}
+      <input type="submit" value="Yes, delete." />
+    </form>
+  {% endif %}
+{% endblock %}
