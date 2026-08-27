@@ -1,6 +1,6 @@
 import datetime
 
-from django.forms import ModelForm
+from django.forms import ModelForm, DateInput
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
@@ -29,3 +29,4 @@ class RenewBookModelForm(ModelForm):
         help_texts = {
             "due_back": _("Enter a date between now and 4 weeks (default 3).")
         }
+        widgets = {"due_back": DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
