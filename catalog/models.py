@@ -81,6 +81,9 @@ class Book(models.Model):
         Language, on_delete=models.RESTRICT, help_text="Select a language for this book"
     )
 
+    class Meta:
+        ordering = ["title"]
+
     def __str__(self):
         """String for representing the Model object."""
         return str(self.title)
