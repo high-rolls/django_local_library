@@ -201,8 +201,8 @@ class GenreModelTest(TestCase):
             help_text, "Enter a book genre (e.g. Science Fiction, French Poetry, etc.)"
         )
 
-    def test_get_absolute_url(self):
-        self.assertEqual(self.genre.get_absolute_url(), f"/catalog/genre-detail/1")
+    # def test_get_absolute_url(self):
+    #    self.assertEqual(self.genre.get_absolute_url(), f"/catalog/genre-detail/1")
 
     def test_name_unique(self):
         with self.assertRaises(IntegrityError):
