@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import (
     Permission,
 )  # Required to grant the permission needed to set a book as returned.
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.test import TestCase
 from django.urls import reverse
@@ -15,6 +16,66 @@ from urllib.parse import urlsplit
 from catalog.models import Author, BookInstance, Book, Genre, Language
 
 User = get_user_model()
+
+
+class AuthorCreateViewTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.test_user = User.objects.create_user(
+            username="test_user", password="some_password"
+        )
+
+        cls.test_user2 = User.objects.create(
+            username="test_user2", password="some_password"
+        )
+
+        content_type_author = ContentType.objects.get_for_model(Author)
+        perm_add_author = Permission.objects.get(
+            codename="add_author", content_type=content_type_author
+        )
+
+        cls.test_user.user_permissions.add(perm_add_author)
+        cls.test_user.save()
+
+    def test_redirect_if_not_logged_in(self):
+        response = self.client.get("/catalog/author/create/")
+        self.assertRedirects(response, "/accounts/login/?next=/catalog/author/create/")
+
+    def test_forbidden_if_logged_in_but_not_correct_permission(self):
+        self.client.force_login(self.test_user2)
+        response = self.client.get(reverse("author-create"))
+        self.assertEqual(response.status_code, 403)  # Forbidden
+
+    def test_view_url_exists_at_desired_location(self):
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse("author-create"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_url_accessible_by_name(self):
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse("author-create"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_view_uses_correct_template(self):
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse("author-create"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "catalog/author_form.html")
+
+    def test_initial_date_of_death_set(self):
+        self.client.force_login(self.test_user)
+        response = self.client.get(reverse("author-create"))
+        self.assertEqual(
+            response.context["form"].initial["date_of_death"], "11/11/2023"
+        )
+
+    def test_redirect_to_authors_list_on_success(self):
+        self.client.force_login(self.test_user)
+        response = self.client.post(
+            reverse("author-create"),
+            {"first_name": "John", "last_name": "Author"},
+        )
+        self.assertRedirects(response, reverse("author-detail", kwargs={"pk": 1}))
 
 
 class AuthorListViewTest(TestCase):
